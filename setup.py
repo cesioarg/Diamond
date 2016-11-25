@@ -136,7 +136,7 @@ setup(
     version=version,
     url='https://github.com/python-diamond/Diamond',
     author='The Diamond Team',
-    author_email='https://github.com/python-diamond/Diamond',
+    author_email='pypi@josediazgonzalez.com',
     license='MIT License',
     description='Smart data producer for graphite graphing package',
     package_dir={'': 'src'},
