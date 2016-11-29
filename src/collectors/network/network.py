@@ -41,7 +41,7 @@ class NetworkCollector(diamond.collector.Collector):
         config = super(NetworkCollector, self).get_default_config()
         config.update({
             'path':         'network',
-            'interfaces':   ['eth', 'bond', 'em', 'p1p', 'eno', 'enp', 'ens',
+            'interfaces':   ['eth', 'veth', 'bond', 'em', 'p1p', 'eno', 'enp', 'ens',
                              'enx'],
             'byte_unit':    ['bit', 'byte'],
             'greedy':       'true',
@@ -59,39 +59,39 @@ class NetworkCollector(diamond.collector.Collector):
         if os.access(self.PROC, os.R_OK):
 
             # Open File
-            file = open(self.PROC)
-            # Build Regular Expression
-            greed = ''
-            if str_to_bool(self.config['greedy']):
-                greed = '\S*'
+             with open(self.PROC) as file:
+                # Build Regular Expression
+                greed = ''
+                if str_to_bool(self.config['greedy']):
+                    greed = '\S*'
 
-            exp = (('^(?:\s*)((?:%s)%s):(?:\s*)' +
-                    '(?P<rx_bytes>\d+)(?:\s*)' +
-                    '(?P<rx_packets>\w+)(?:\s*)' +
-                    '(?P<rx_errors>\d+)(?:\s*)' +
-                    '(?P<rx_drop>\d+)(?:\s*)' +
-                    '(?P<rx_fifo>\d+)(?:\s*)' +
-                    '(?P<rx_frame>\d+)(?:\s*)' +
-                    '(?P<rx_compressed>\d+)(?:\s*)' +
-                    '(?P<rx_multicast>\d+)(?:\s*)' +
-                    '(?P<tx_bytes>\d+)(?:\s*)' +
-                    '(?P<tx_packets>\w+)(?:\s*)' +
-                    '(?P<tx_errors>\d+)(?:\s*)' +
-                    '(?P<tx_drop>\d+)(?:\s*)' +
-                    '(?P<tx_fifo>\d+)(?:\s*)' +
-                    '(?P<tx_colls>\d+)(?:\s*)' +
-                    '(?P<tx_carrier>\d+)(?:\s*)' +
-                    '(?P<tx_compressed>\d+)(?:.*)$') %
-                   (('|'.join(self.config['interfaces'])), greed))
-            reg = re.compile(exp)
-            # Match Interfaces
-            for line in file:
-                match = reg.match(line)
-                if match:
-                    device = match.group(1)
-                    results[device] = match.groupdict()
-            # Close File
-            file.close()
+                exp = (('^(?:\s*)((?:%s)%s):(?:\s*)' +
+                        '(?P<rx_bytes>\d+)(?:\s*)' +
+                        '(?P<rx_packets>\w+)(?:\s*)' +
+                        '(?P<rx_errors>\d+)(?:\s*)' +
+                        '(?P<rx_drop>\d+)(?:\s*)' +
+                        '(?P<rx_fifo>\d+)(?:\s*)' +
+                        '(?P<rx_frame>\d+)(?:\s*)' +
+                        '(?P<rx_compressed>\d+)(?:\s*)' +
+                        '(?P<rx_multicast>\d+)(?:\s*)' +
+                        '(?P<tx_bytes>\d+)(?:\s*)' +
+                        '(?P<tx_packets>\w+)(?:\s*)' +
+                        '(?P<tx_errors>\d+)(?:\s*)' +
+                        '(?P<tx_drop>\d+)(?:\s*)' +
+                        '(?P<tx_fifo>\d+)(?:\s*)' +
+                        '(?P<tx_colls>\d+)(?:\s*)' +
+                        '(?P<tx_carrier>\d+)(?:\s*)' +
+                        '(?P<tx_compressed>\d+)(?:.*)$') %
+                       (('|'.join(self.config['interfaces'])), greed))
+                reg = re.compile(exp)
+                # Match Interfaces
+                for line in file:
+                    match = reg.match(line)
+                    if match:
+                        device = match.group(1)
+                        results[device] = match.groupdict()
+                # Close File
+
         else:
             if not psutil:
                 self.log.error('Unable to import psutil')
